@@ -22,7 +22,7 @@ void snake_init(uint16_t init_len, uint16_t color) {
 	snk_dir->hor = 0;
 	snk->dir = snk_dir;
 
-	while (snk->length < init_len) {
+	while (snk->length <= init_len) {
 		if (snk->head == NULL) {
 			occupied_grid *original_grid = (occupied_grid*) malloc(
 					sizeof(occupied_grid));
@@ -113,7 +113,7 @@ position* random_pos() {
 			}
 			body = body->next;
 		}
-		if (x != b->pos->x && x != stone->x && y != b->pos->y
+		if (b != NULL && stone != NULL && x != b->pos->x && x != stone->x && y != b->pos->y
 				&& y != stone->y) {
 			break;
 		}

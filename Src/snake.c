@@ -113,10 +113,17 @@ position* random_pos() {
 			}
 			body = body->next;
 		}
-		if (b != NULL && stone != NULL && x != b->pos->x && x != stone->x && y != b->pos->y
-				&& y != stone->y) {
+		if (b != NULL && stone != NULL && \
+		    x != b->pos->x && x != stone->x && y != b->pos->y && y != stone->y) {
 			break;
+		}else if (b != NULL && stone == NULL && x != b->pos->x && y != b->pos->y){
+			break;	
+		}else if (b == NULL && stone != NULL && x != stone->x && y != stone->y){
+			break;	
+		}else if (b == NULL && stone == NULL){
+			break;	
 		}
+		
 	} while (1);
 	temp_pos->x = x;
 	temp_pos->y = y;

@@ -163,21 +163,18 @@ void generate_bean() {
 		b->color = MAGENTA;
 		break;
 	case 9:
-		b->color = GREEN;
-		break;
-	case 10:
 		b->color = CYAN;
 		break;
-	case 11:
+	case 10:
 		b->color = YELLOW;
 		break;
-	case 12:
+	case 11:
 		b->color = BROWN;
 		break;
-	case 13:
+	case 12:
 		b->color = BRRED;
 		break;
-	case 14:
+	case 13:
 		b->color = GRAY;
 		break;
 	default:

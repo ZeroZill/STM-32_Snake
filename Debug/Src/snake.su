@@ -1,0 +1,11 @@
+snake.c:15:6:snake_init	32	static
+snake.c:46:6:snake_grow	16	static
+snake.c:60:6:snake_tail_lengthen	24	static
+snake.c:73:9:bite_self	16	static
+snake.c:88:9:hit_wall	16	static
+snake.c:95:9:hit_stone	16	static
+snake.c:101:11:random_pos	32	static
+snake.c:124:6:generate_bean	24	static
+snake.c:179:6:generate_stone	8	static
+snake.c:190:6:draw_background	8	static
+snake.c:196:6:draw_score	32	static

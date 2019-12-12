@@ -22,8 +22,8 @@ void snake_init(uint16_t init_len, uint16_t color) {
 	snk->head = snk->tail = NULL;
 	snk->length = 0;
 	direction *snk_dir = (direction *) malloc(sizeof(direction));
-	snk_dir->ver = -1;
-	snk_dir->hor = 0;
+	snk_dir->ver = 0;
+	snk_dir->hor = -1;
 	snk->dir = snk_dir;
 
 	while (snk->length <= init_len) {
@@ -49,8 +49,8 @@ void snake_init(uint16_t init_len, uint16_t color) {
 /* Add a segment of snake body in front of the head if the snake can eat the bean */
 void snake_forward() {
 	occupied_grid *next_head = (occupied_grid *) malloc(sizeof(occupied_grid));
-	next_head->pos->x = snk->head->pos->x + snk->dir->ver;
-	next_head->pos->y = snk->head->pos->y + snk->dir->hor;
+	next_head->pos->x = snk->head->pos->x + snk->dir->hor;
+	next_head->pos->y = snk->head->pos->y + snk->dir->ver;
 	next_head->next = snk->head;
 	snk->head = next_head;
 	if (next_head->pos->x == b->pos->x && next_head->pos->y == b->pos->y) {
@@ -108,8 +108,8 @@ position* random_pos() {
 	position * temp_pos = (position *) malloc(sizeof(position));
 	uint16_t x, y;
 	occupied_grid *body;
+	srand((unsigned) time(NULL));
 	do {
-		srand((unsigned) time(NULL));
 		x = rand() % HORIZONTAL_GRID_NUMBER;
 		y = rand() % VERTICAL_GRID_NUMBER;
 		body = snk->head;
@@ -143,7 +143,6 @@ void generate_bean() {
 	uint8_t color_idx;
 	position * temp_pos = random_pos();
 	b->pos = temp_pos;
-	srand((unsigned) time(NULL));
 	color_idx = rand() % 13 + 1;	// color_idx is in [1,14]
 	switch (color_idx) {
 	case 1:

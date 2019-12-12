@@ -136,7 +136,7 @@ void generate_bean() {
 	position * temp_pos = random_pos();
 	b->pos = temp_pos;
 	srand((unsigned) time(NULL));
-	color_idx = rand() % 14 + 1;	// color_idx is in [1,14]
+	color_idx = rand() % 13 + 1;	// color_idx is in [1,14]
 	switch (color_idx) {
 	case 1:
 		b->color = WHITE;
@@ -188,10 +188,14 @@ void generate_stone() {
 }
 
 /* Get the signal of keyboard */
-uint8_t get_key();
+uint8_t get_key(){
+    //TODO: to be implemented
+}
 
 /* Move snake's body */
-void move();
+void move(){
+    //TODO: to be implemented
+}
 
 /* Draw the back ground */
 void draw_background(){
@@ -208,25 +212,24 @@ void draw_score() {
 	char num[8];
 	char *content = "SCORE: ";
 	itoa(score, num, 10);
-	strcat(content, num);
 	POINT_COLOR = RED;
-	LCD_ShowString(20, 280, 200, 40, 24, (uint8_t*) content);
+	LCD_ShowString(20, 290, 200, 30, 24, (uint8_t*) content);
+	LCD_ShowString(120, 290, 200, 30, 24, (uint8_t*) num);
 }
 
 /* Draw one grid of snake body */
 void draw_snake_body(occupied_grid *og){
 	POINT_COLOR = snk->color;
 	LCD_Fill(10*(og->pos->x),10*(og->pos->y),10*(og->pos->x)+10,10*(og->pos->y)+10,POINT_COLOR);
-	 // LCD_Draw_Circle(10*(og->pos->x)+5,10*(og->pos->y)+5,5);
 };
 
 /* Draw the snake */
 void draw_snake(){
 	occupied_grid *tmp=snk->head;
 	while(tmp->next){
-	draw_snake_body(tmp);
-	tmp=tmp->next;}
-
+	    draw_snake_body(tmp);
+	    tmp=tmp->next;
+	}
 }
 
 
@@ -241,7 +244,6 @@ void draw_bean(){
 
 /* Draw the stone */
 void draw_stone(){
-
 	LCD_Fill(10*(stone->x),10*(stone->y),10*(stone->x)+10,10*(stone->y)+10,BROWN);
 	POINT_COLOR= BLACK;
 	LCD_DrawRectangle(10*(stone->x),10*(stone->y),10*(stone->x)+10,10*(stone->y)+10);
@@ -251,6 +253,8 @@ void draw_stone(){
 
 /* Launch game */
 void launch(){
+	// TODO: Need to be implemented.
+	/*
 	snake_init(3, GREEN);
 	//generate_bean();
 	generate_stone();
@@ -259,5 +263,6 @@ void launch(){
 	draw_snake();
 	draw_bean();
 	draw_stone();
+	*/
 }
 

@@ -31,8 +31,8 @@ void snake_init(uint16_t init_len, uint16_t color) {
 			occupied_grid *original_grid = (occupied_grid*) malloc(
 					sizeof(occupied_grid));
 			position *original_pos = (position*) malloc(sizeof(position));
-			original_pos->x = VERTICAL_GRID_NUMBER / 2;
-			original_pos->y = HORIZONTAL_GRID_NUMBER / 2;
+			original_pos->x = HORIZONTAL_GRID_NUMBER / 2;
+			original_pos->y = VERTICAL_GRID_NUMBER / 2;
 			original_grid->pos = original_pos;
 			original_grid->prev = original_grid->next = NULL;
 			snk->head = snk->tail = original_grid;
@@ -93,8 +93,8 @@ uint8_t bite_self() {
 /* Judge if the snake hits the wall */
 uint8_t hit_wall() {
 	position *head_pos = snk->head->pos;
-	return head_pos->x < 0 || head_pos->x >= VERTICAL_GRID_NUMBER
-			|| head_pos->y < 0 || head_pos->y >= HORIZONTAL_GRID_NUMBER;
+	return head_pos->x < 0 || head_pos->x >= HORIZONTAL_GRID_NUMBER
+			|| head_pos->y < 0 || head_pos->y >= VERTICAL_GRID_NUMBER;
 }
 
 /* Judge if the snake hits the stone */
@@ -110,8 +110,8 @@ position* random_pos() {
 	occupied_grid *body;
 	do {
 		srand((unsigned) time(NULL));
-		x = rand() % VERTICAL_GRID_NUMBER;
-		y = rand() % HORIZONTAL_GRID_NUMBER;
+		x = rand() % HORIZONTAL_GRID_NUMBER;
+		y = rand() % VERTICAL_GRID_NUMBER;
 		body = snk->head;
 		while (body != NULL) {
 			if (body->pos->x == x && body->pos->y == y) {

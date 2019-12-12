@@ -44,13 +44,20 @@ void snake_init(uint16_t init_len, uint16_t color) {
 		}
 		snk->length++;
 	}
+	time_snake = (unsigned) time(NULL);
 }
 
 /* Add a segment of snake body in front of the head if the snake can eat the bean */
 void snake_forward() {
 	occupied_grid *next_head = (occupied_grid *) malloc(sizeof(occupied_grid));
-	next_head->pos->x = snk->head->pos->x + snk->dir->hor;
-	next_head->pos->y = snk->head->pos->y + snk->dir->ver;
+	next_head->pos->x = (snk->head->pos->x + snk->dir->hor)
+			% HORIZONTAL_GRID_NUMBER;
+	next_head->pos->y = (snk->head->pos->y + snk->dir->ver)
+			% VERTICAL_GRID_NUMBER;
+//	if (next_head->pos->x >= HORIZONTAL_GRID_NUMBER){
+//		next_head->pos->x = next_head->pos->x - HORIZONTAL_GRID_NUMBER;
+//	}
+
 	next_head->next = snk->head;
 	snk->head = next_head;
 	if (next_head->pos->x == b->pos->x && next_head->pos->y == b->pos->y) {
@@ -187,23 +194,26 @@ void generate_bean() {
 	default:
 		break;
 	}
+	time_bean = (unsigned) time(NULL);
 }
 
 /* Generate a stone */
 void generate_stone() {
 	stone = random_pos();
+	time_stone = (unsigned) time(NULL);
 }
 
-/* Get the signal of keyboard */
-uint8_t get_key() {
-	//TODO: to be implemented
-
-}
+///* Get the signal of keyboard */
+//uint8_t get_key() {
+//	//TODO: to be implemented
+//
+//}
 
 /* Move snake's body */
 void move() {
-	if (time(Null) - time_snake > time_interval) {
+	if ((unsigned) time(NULL) - time_snake > time_interval) {
 		snake_forward();
+		time_snake = time(NULL);
 	}
 	if (HAL_GPIO_ReadPin(KEY0_GPIO_Port, KEY0_Pin) == GPIO_PIN_SET) {
 		if (snk->dir->hor == 1) {
@@ -221,6 +231,7 @@ void move() {
 		}
 
 		snake_forward();
+		time_snake = time(NULL);
 	}
 	if (HAL_GPIO_ReadPin(KEY1_GPIO_Port, KEY1_Pin) == GPIO_PIN_SET) {
 		if (snk->dir->hor == 1) {
@@ -238,6 +249,7 @@ void move() {
 		}
 
 		snake_forward();
+		time_snake = time(NULL);
 	}
 
 }
@@ -300,15 +312,24 @@ void draw_stone() {
 /* Launch game */
 void launch() {
 	// TODO: Need to be implemented.
-	/*
-	 snake_init(3, GREEN);
-	 //generate_bean();
-	 generate_stone();
-	 draw_background();
-	 draw_score();
-	 draw_snake();
-	 draw_bean();
-	 draw_stone();
-	 */
+	snake_init(3, GREEN);
+	generate_bean();
+	generate_stone();
+	draw_background();
+	draw_score();
+	draw_snake();
+	while (end_game == 0) {
+		HAL_Delay(100);
+		draw_background();
+		draw_score();
+		draw_snake();
+		if ((unsigned) time(NULL) - time_bean > 3)
+			generate_bean();
+		draw_bean();
+		if ((unsigned) time(NULL) - time_stone > 3)
+			generate_stone();
+		draw_stone();
+		move();
+	}
 }
 

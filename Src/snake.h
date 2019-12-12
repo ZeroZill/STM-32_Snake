@@ -11,30 +11,33 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
+#include <stdio.h>
 #include "lcd.h"
-
+#include "usart.h"
+#include "gpio.h"
 /*
  * The area of game is 240*280(from up-left to down-right), and one grid is 10*10(from 0-9)
  */
 #define VERTICAL_GRID_NUMBER 28
 #define HORIZONTAL_GRID_NUMBER 24
 
-static uint16_t score = 0;				// Score
-static uint8_t end_game = 0;			// If the game is over.
-static uint16_t time_interval = 1000;	// Time interval for moving
-
+static int score = 0;				// Score
+static int end_game = 0;			// If the game is over.
+static int time_interval = 1000;	// Time interval for moving
+static int milisecond = 0;			// MiliSecond
+static int green_blink = 0;
+static int red_blink = 0;
 
 /* The position tuple */
 typedef struct position {
-	uint16_t x;
-	uint16_t y;
+	int x;
+	int y;
 } position;
 
 /* The direction of movement */
 typedef struct direction {
-	uint16_t ver;	// vertical value, {1:right , -1:left, 0:neither}
-	uint16_t hor;	// Horizontal value, {1:down , -1:up, 0:neither}
+	short ver;	// vertical value, {1:right , -1:left, 0:neither}
+	short hor;	// Horizontal value, {1:down , -1:up, 0:neither}
 } direction;
 
 /* Store bean */
@@ -54,13 +57,13 @@ typedef struct occupied_grid {
 typedef struct snake {
 	occupied_grid *head;
 	occupied_grid *tail;
-	uint16_t length;
+	int length;
 	uint16_t color;
 	direction *dir;
 } snake;
 
 /* Initializing the snake with specific length and color */
-void snake_init(uint16_t init_len, uint16_t color);
+void snake_init(int init_len, uint16_t color);
 
 /* Add a segment of snake body in front of the head if the snake can eat the bean */
 void snake_forward();
@@ -69,13 +72,13 @@ void snake_forward();
 void snake_tail_lengthen(direction *dir);
 
 /* Judge if the snake bites itself */
-uint8_t bite_self();
+int bite_self();
 
 /* Judge if the snake hits the wall */
-uint8_t hit_wall();
+int hit_wall();
 
 /* Judge if the snake hits the stone */
-uint8_t hit_stone();
+int hit_stone();
 
 /* Get a random position out of snake's body */
 position* random_pos();
@@ -112,6 +115,7 @@ void draw_stone();
 
 /* Print all staffs, including snake, bean and stone */
 void draw_all();
+
 
 
 /* Launch game */

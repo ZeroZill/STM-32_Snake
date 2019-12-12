@@ -1,0 +1,4 @@
+data_structures.c:13:6:snake_init	32	static
+data_structures.c:39:6:snake_grow	16	static
+data_structures.c:44:6:snake_tail_lengthen	24	static
+data_structures.c:57:6:bite_self	4	static

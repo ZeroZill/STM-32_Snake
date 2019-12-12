@@ -1,0 +1,4 @@
+freertos.c:71:6:MX_FREERTOS_Init	80	static
+freertos.c:118:6:GameFunc	16	static
+freertos.c:141:6:TimeFunc	16	static
+freertos.c:160:6:LEDFunc	16	static

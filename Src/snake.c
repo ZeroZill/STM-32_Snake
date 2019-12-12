@@ -16,40 +16,41 @@ unsigned time_stone;
 unsigned time_snake;
 
 /* Initializing the snake with specific length and color */
-void snake_init(uint16_t init_len, uint16_t color) {
-	snk = (snake *) malloc(sizeof(snake));
-	snk->color = color;
-	snk->head = snk->tail = NULL;
-	snk->length = 0;
-	direction *snk_dir = (direction *) malloc(sizeof(direction));
-	snk_dir->ver = 0;
-	snk_dir->hor = -1;
-	snk->dir = snk_dir;
+void snake_init(int init_len, uint16_t color) {
+	snake snk_t;
+	snk = &snk_t;
 
-	while (snk->length <= init_len) {
-		if (snk->head == NULL) {
-			occupied_grid *original_grid = (occupied_grid*) malloc(
-					sizeof(occupied_grid));
-			position *original_pos = (position*) malloc(sizeof(position));
+	snk->color = color;
+	snk->length = 0;
+	snk->dir->ver = 0;
+	snk->dir->hor = -1;
+
+	while (snk->length < init_len) {
+		if (snk->length == 0) {
+			occupied_grid temp_og;
+			position temp_p;
+			occupied_grid *original_grid = &temp_og;
+			position *original_pos = &temp_p;
 			original_pos->x = HORIZONTAL_GRID_NUMBER / 2;
 			original_pos->y = VERTICAL_GRID_NUMBER / 2;
 			original_grid->pos = original_pos;
-			original_grid->prev = original_grid->next = NULL;
 			snk->head = snk->tail = original_grid;
 		} else {
-			direction *dir = (direction *) malloc(sizeof(direction));
-			dir->hor = 1;
+			direction temp_d;
+			direction *dir = &temp_d;
 			dir->ver = 0;
+			dir->hor = 1;
 			snake_tail_lengthen(dir);
 		}
 		snk->length++;
 	}
-	time_snake = (unsigned) time(NULL);
+	time_snake = milisecond;
 }
 
 /* Add a segment of snake body in front of the head if the snake can eat the bean */
 void snake_forward() {
-	occupied_grid *next_head = (occupied_grid *) malloc(sizeof(occupied_grid));
+	occupied_grid temp_og;
+	occupied_grid *next_head = &temp_og;
 	next_head->pos->x = (snk->head->pos->x + snk->dir->hor)
 			% HORIZONTAL_GRID_NUMBER;
 	next_head->pos->y = (snk->head->pos->y + snk->dir->ver)
@@ -64,15 +65,22 @@ void snake_forward() {
 		snk->color = b->color;
 		snk->length++;
 		score++;
+		time_interval = 25 * (40 - score / 3);
+		green_blink = 1;
 	} else {
+		occupied_grid *temp = snk->tail->prev;
 		snk->tail = snk->tail->prev;
+		free(temp->pos);
+		free(temp);
 	}
 }
 
 /* Lengthen the snake by adding a segment to the tail */
 void snake_tail_lengthen(direction *dir) {
-	occupied_grid *temp = (occupied_grid*) malloc(sizeof(occupied_grid));
-	position *temp_pos = (position*) malloc(sizeof(position));
+	occupied_grid temp_og;
+	position temp_p;
+	occupied_grid *temp = &temp_og;
+	position *temp_pos = &temp_p;
 	temp_pos->x = snk->tail->pos->x + dir->hor;
 	temp_pos->y = snk->tail->pos->y + dir->ver;
 	temp->pos = temp_pos;
@@ -83,7 +91,7 @@ void snake_tail_lengthen(direction *dir) {
 }
 
 /* Judge if the snake bites itself */
-uint8_t bite_self() {
+int bite_self() {
 	occupied_grid *body;
 	body = snk->head->next;
 	while (body != NULL) {
@@ -98,24 +106,30 @@ uint8_t bite_self() {
 }
 
 /* Judge if the snake hits the wall */
-uint8_t hit_wall() {
+int hit_wall() {
 	position *head_pos = snk->head->pos;
 	return head_pos->x < 0 || head_pos->x >= HORIZONTAL_GRID_NUMBER
 			|| head_pos->y < 0 || head_pos->y >= VERTICAL_GRID_NUMBER;
 }
 
 /* Judge if the snake hits the stone */
-uint8_t hit_stone() {
+int hit_stone() {
 	position *head_pos = snk->head->pos;
 	return head_pos->x == stone->x && head_pos->y == stone->y;
 }
 
 /* Get a random position out of snake's body */
 position* random_pos() {
-	position * temp_pos = (position *) malloc(sizeof(position));
+	position temp_p;
+	position * temp_pos = &temp_p;
 	uint16_t x, y;
 	occupied_grid *body;
-	srand((unsigned) time(NULL));
+
+	char msg[20];
+	sprintf(msg, "%d\r\n", milisecond);
+	HAL_UART_Transmit(&huart2, (uint8_t*) msg, strlen(msg), HAL_MAX_DELAY);
+
+	srand(milisecond);
 	do {
 		x = rand() % HORIZONTAL_GRID_NUMBER;
 		y = rand() % VERTICAL_GRID_NUMBER;
@@ -194,13 +208,13 @@ void generate_bean() {
 	default:
 		break;
 	}
-	time_bean = (unsigned) time(NULL);
+	time_bean = milisecond;
 }
 
 /* Generate a stone */
 void generate_stone() {
 	stone = random_pos();
-	time_stone = (unsigned) time(NULL);
+	time_stone = milisecond;
 }
 
 ///* Get the signal of keyboard */
@@ -211,11 +225,11 @@ void generate_stone() {
 
 /* Move snake's body */
 void move() {
-	if ((unsigned) time(NULL) - time_snake > time_interval) {
+	if (milisecond - time_snake > time_interval) {
 		snake_forward();
-		time_snake = time(NULL);
+		time_snake = milisecond;
 	}
-	if (HAL_GPIO_ReadPin(KEY0_GPIO_Port, KEY0_Pin) == GPIO_PIN_SET) {
+	if (HAL_GPIO_ReadPin(KEY0_GPIO_Port, KEY0_Pin) == GPIO_PIN_RESET) {
 		if (snk->dir->hor == 1) {
 			snk->dir->hor = 0;
 			snk->dir->ver = 1;
@@ -231,9 +245,9 @@ void move() {
 		}
 
 		snake_forward();
-		time_snake = time(NULL);
+		time_snake = milisecond;
 	}
-	if (HAL_GPIO_ReadPin(KEY1_GPIO_Port, KEY1_Pin) == GPIO_PIN_SET) {
+	if (HAL_GPIO_ReadPin(KEY1_GPIO_Port, KEY1_Pin) == GPIO_PIN_RESET) {
 		if (snk->dir->hor == 1) {
 			snk->dir->hor = 0;
 			snk->dir->ver = -1;
@@ -249,7 +263,7 @@ void move() {
 		}
 
 		snake_forward();
-		time_snake = time(NULL);
+		time_snake = milisecond;
 	}
 
 }
@@ -285,7 +299,8 @@ void draw_snake_body(occupied_grid *og) {
 /* Draw the snake */
 void draw_snake() {
 	occupied_grid *tmp = snk->head;
-	while (tmp->next) {
+
+	while (tmp->next != NULL) {
 		draw_snake_body(tmp);
 		tmp = tmp->next;
 	}
@@ -312,24 +327,35 @@ void draw_stone() {
 /* Launch game */
 void launch() {
 	// TODO: Need to be implemented.
-	snake_init(3, GREEN);
-	generate_bean();
-	generate_stone();
 	draw_background();
-	draw_score();
+	score = 1;		// debug
+	draw_score();	//debug
+
+	snake_init(3, WHITE);
 	draw_snake();
-	while (end_game == 0) {
-		HAL_Delay(100);
-		draw_background();
-		draw_score();
-		draw_snake();
-		if ((unsigned) time(NULL) - time_bean > 3)
-			generate_bean();
-		draw_bean();
-		if ((unsigned) time(NULL) - time_stone > 3)
-			generate_stone();
-		draw_stone();
-		move();
-	}
+	score = 2;
+draw_score();
+
+	generate_bean();
+//
+//	generate_stone();
+//	while (end_game == 0) {
+//		HAL_Delay(100);
+//		draw_background();
+//		draw_score();
+//		draw_snake();
+//		if (milisecond - time_bean > 3000) {
+//			generate_bean();
+//		}
+//		draw_bean();
+//
+//		if (milisecond - time_stone > 3000) {
+//			generate_stone();
+//		}
+//		draw_stone();
+//
+//		move();
+//	}
+	red_blink = 1;
 }
 

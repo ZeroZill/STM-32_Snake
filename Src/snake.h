@@ -17,8 +17,8 @@
 /*
  * The area of game is 240*280(from up-left to down-right), and one grid is 10*10(from 0-9)
  */
-#define VERTICAL_GRID_NUMBER 24
-#define HORIZONTAL_GRID_NUMBER 28
+#define VERTICAL_GRID_NUMBER 28
+#define HORIZONTAL_GRID_NUMBER 24
 
 static uint16_t score = 0;				// Score
 static uint8_t end_game = 0;			// If the game is over.

@@ -11,6 +11,10 @@ position *stone;
 snake *snk;
 uint8_t i;
 
+unsigned time_bean;
+unsigned time_stone;
+unsigned time_snake;
+
 /* Initializing the snake with specific length and color */
 void snake_init(uint16_t init_len, uint16_t color) {
 	snk = (snake *) malloc(sizeof(snake));
@@ -47,12 +51,14 @@ void snake_forward() {
 	occupied_grid *next_head = (occupied_grid *) malloc(sizeof(occupied_grid));
 	next_head->pos->x = snk->head->pos->x + snk->dir->ver;
 	next_head->pos->y = snk->head->pos->y + snk->dir->hor;
+	next_head->next = snk->head;
+	snk->head = next_head;
 	if (next_head->pos->x == b->pos->x && next_head->pos->y == b->pos->y) {
-		next_head->next = snk->head;
-		snk->head = next_head;
 		snk->color = b->color;
 		snk->length++;
 		score++;
+	} else {
+		snk->tail = snk->tail->prev;
 	}
 }
 
@@ -113,17 +119,19 @@ position* random_pos() {
 			}
 			body = body->next;
 		}
-		if (b != NULL && stone != NULL && \
-		    x != b->pos->x && x != stone->x && y != b->pos->y && y != stone->y) {
+		if (b != NULL && stone != NULL && x != b->pos->x && x != stone->x
+				&& y != b->pos->y && y != stone->y) {
 			break;
-		}else if (b != NULL && stone == NULL && x != b->pos->x && y != b->pos->y){
-			break;	
-		}else if (b == NULL && stone != NULL && x != stone->x && y != stone->y){
-			break;	
-		}else if (b == NULL && stone == NULL){
-			break;	
+		} else if (b != NULL && stone == NULL && x != b->pos->x
+				&& y != b->pos->y) {
+			break;
+		} else if (b == NULL && stone != NULL && x != stone->x
+				&& y != stone->y) {
+			break;
+		} else if (b == NULL && stone == NULL) {
+			break;
 		}
-		
+
 	} while (1);
 	temp_pos->x = x;
 	temp_pos->y = y;
@@ -188,23 +196,61 @@ void generate_stone() {
 }
 
 /* Get the signal of keyboard */
-uint8_t get_key(){
-    //TODO: to be implemented
+uint8_t get_key() {
+	//TODO: to be implemented
+
 }
 
 /* Move snake's body */
-void move(){
-    //TODO: to be implemented
+void move() {
+	if (time(Null) - time_snake > time_interval) {
+		snake_forward();
+	}
+	if (HAL_GPIO_ReadPin(KEY0_GPIO_Port, KEY0_Pin) == GPIO_PIN_SET) {
+		if (snk->dir->hor == 1) {
+			snk->dir->hor = 0;
+			snk->dir->ver = 1;
+		} else if (snk->dir->hor == -1) {
+			snk->dir->hor = 0;
+			snk->dir->ver = -1;
+		} else if (snk->dir->ver == 1) {
+			snk->dir->hor = -1;
+			snk->dir->ver = 0;
+		} else if (snk->dir->ver == -1) {
+			snk->dir->hor = 1;
+			snk->dir->ver = 0;
+		}
+
+		snake_forward();
+	}
+	if (HAL_GPIO_ReadPin(KEY1_GPIO_Port, KEY1_Pin) == GPIO_PIN_SET) {
+		if (snk->dir->hor == 1) {
+			snk->dir->hor = 0;
+			snk->dir->ver = -1;
+		} else if (snk->dir->hor == -1) {
+			snk->dir->hor = 0;
+			snk->dir->ver = 1;
+		} else if (snk->dir->ver == 1) {
+			snk->dir->hor = 1;
+			snk->dir->ver = 0;
+		} else if (snk->dir->ver == -1) {
+			snk->dir->hor = -1;
+			snk->dir->ver = 0;
+		}
+
+		snake_forward();
+	}
+
 }
 
 /* Draw the back ground */
-void draw_background(){
+void draw_background() {
 	LCD_Clear(0X2722);
 	BACK_COLOR = LIGHTBLUE;
-	LCD_Fill(0,280,240,320,LIGHTBLUE);
+	LCD_Fill(0, 280, 240, 320, LIGHTBLUE);
 
-	POINT_COLOR=BLACK;
-	LCD_DrawRectangle(0,320,240,280);
+	POINT_COLOR = BLACK;
+	LCD_DrawRectangle(0, 320, 240, 280);
 }
 
 /* Draw the score */
@@ -218,51 +264,52 @@ void draw_score() {
 }
 
 /* Draw one grid of snake body */
-void draw_snake_body(occupied_grid *og){
+void draw_snake_body(occupied_grid *og) {
 	POINT_COLOR = snk->color;
-	LCD_Fill(10*(og->pos->x),10*(og->pos->y),10*(og->pos->x)+10,10*(og->pos->y)+10,POINT_COLOR);
-};
+	LCD_Fill(10 * (og->pos->x), 10 * (og->pos->y), 10 * (og->pos->x) + 10,
+			10 * (og->pos->y) + 10, POINT_COLOR);
+}
+;
 
 /* Draw the snake */
-void draw_snake(){
-	occupied_grid *tmp=snk->head;
-	while(tmp->next){
-	    draw_snake_body(tmp);
-	    tmp=tmp->next;
+void draw_snake() {
+	occupied_grid *tmp = snk->head;
+	while (tmp->next) {
+		draw_snake_body(tmp);
+		tmp = tmp->next;
 	}
 }
 
-
 /* Draw the bean */
-void draw_bean(){
-	LCD_Draw_Circle(10*(b->pos->x)+5,10*(b->pos->y)+5,5);
-	LCD_Draw_Circle(10*(b->pos->x)+5,10*(b->pos->y)+5,4);
-	LCD_Draw_Circle(10*(b->pos->x)+5,10*(b->pos->y)+5,3);
-	LCD_Draw_Circle(10*(b->pos->x)+5,10*(b->pos->y)+5,2);
-	LCD_Draw_Circle(10*(b->pos->x)+5,10*(b->pos->y)+5,1);
+void draw_bean() {
+	LCD_Draw_Circle(10 * (b->pos->x) + 5, 10 * (b->pos->y) + 5, 5);
+	LCD_Draw_Circle(10 * (b->pos->x) + 5, 10 * (b->pos->y) + 5, 4);
+	LCD_Draw_Circle(10 * (b->pos->x) + 5, 10 * (b->pos->y) + 5, 3);
+	LCD_Draw_Circle(10 * (b->pos->x) + 5, 10 * (b->pos->y) + 5, 2);
+	LCD_Draw_Circle(10 * (b->pos->x) + 5, 10 * (b->pos->y) + 5, 1);
 }
 
 /* Draw the stone */
-void draw_stone(){
-	LCD_Fill(10*(stone->x),10*(stone->y),10*(stone->x)+10,10*(stone->y)+10,BROWN);
-	POINT_COLOR= BLACK;
-	LCD_DrawRectangle(10*(stone->x),10*(stone->y),10*(stone->x)+10,10*(stone->y)+10);
+void draw_stone() {
+	LCD_Fill(10 * (stone->x), 10 * (stone->y), 10 * (stone->x) + 10,
+			10 * (stone->y) + 10, BROWN);
+	POINT_COLOR = BLACK;
+	LCD_DrawRectangle(10 * (stone->x), 10 * (stone->y), 10 * (stone->x) + 10,
+			10 * (stone->y) + 10);
 }
 
-
-
 /* Launch game */
-void launch(){
+void launch() {
 	// TODO: Need to be implemented.
 	/*
-	snake_init(3, GREEN);
-	//generate_bean();
-	generate_stone();
-	draw_background();
-	draw_score();
-	draw_snake();
-	draw_bean();
-	draw_stone();
-	*/
+	 snake_init(3, GREEN);
+	 //generate_bean();
+	 generate_stone();
+	 draw_background();
+	 draw_score();
+	 draw_snake();
+	 draw_bean();
+	 draw_stone();
+	 */
 }
 

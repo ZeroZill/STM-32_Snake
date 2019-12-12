@@ -194,9 +194,13 @@ uint8_t get_key();
 void move();
 
 /* Draw the back ground */
-void draw_background() {
-	LCD_Clear(GRAYBLUE);
-	BACK_COLOR = GRAYBLUE;
+void draw_background(){
+	LCD_Clear(0X2722);
+	BACK_COLOR = LIGHTBLUE;
+	LCD_Fill(0,280,240,320,LIGHTBLUE);
+
+	POINT_COLOR=BLACK;
+	LCD_DrawRectangle(0,320,240,280);
 }
 
 /* Draw the score */
@@ -210,19 +214,50 @@ void draw_score() {
 }
 
 /* Draw one grid of snake body */
-void draw_snake_body(occupied_grid *og);
+void draw_snake_body(occupied_grid *og){
+	POINT_COLOR = snk->color;
+	LCD_Fill(10*(og->pos->x),10*(og->pos->y),10*(og->pos->x)+10,10*(og->pos->y)+10,POINT_COLOR);
+	 // LCD_Draw_Circle(10*(og->pos->x)+5,10*(og->pos->y)+5,5);
+};
 
 /* Draw the snake */
-void draw_snake();
+void draw_snake(){
+	occupied_grid *tmp=snk->head;
+	while(tmp->next){
+	draw_snake_body(tmp);
+	tmp=tmp->next;}
+
+}
+
 
 /* Draw the bean */
-void draw_bean();
+void draw_bean(){
+	LCD_Draw_Circle(10*(b->pos->x)+5,10*(b->pos->y)+5,5);
+	LCD_Draw_Circle(10*(b->pos->x)+5,10*(b->pos->y)+5,4);
+	LCD_Draw_Circle(10*(b->pos->x)+5,10*(b->pos->y)+5,3);
+	LCD_Draw_Circle(10*(b->pos->x)+5,10*(b->pos->y)+5,2);
+	LCD_Draw_Circle(10*(b->pos->x)+5,10*(b->pos->y)+5,1);
+}
 
 /* Draw the stone */
-void draw_stone();
+void draw_stone(){
 
-/* Print all staffs, including snake, bean and stone */
-void draw_all();
+	LCD_Fill(10*(stone->x),10*(stone->y),10*(stone->x)+10,10*(stone->y)+10,BROWN);
+	POINT_COLOR= BLACK;
+	LCD_DrawRectangle(10*(stone->x),10*(stone->y),10*(stone->x)+10,10*(stone->y)+10);
+}
+
+
 
 /* Launch game */
-void launch();
+void launch(){
+	snake_init(3, GREEN);
+	//generate_bean();
+	generate_stone();
+	draw_background();
+	draw_score();
+	draw_snake();
+	draw_bean();
+	draw_stone();
+}
+
